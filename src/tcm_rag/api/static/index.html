@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>中医循证检索增强问答系统</title>
+<style>
+  :root {
+    --bg: #f6f3ec; --panel: #fffdf8; --ink: #2b2b28; --muted: #7a7568;
+    --accent: #7a4a21; --accent2: #3d6b4f; --line: #e4ddcd;
+    --warn-bg: #fdf3e3; --warn-border: #d9a441; --refuse-bg: #fdeeee; --refuse-border: #c66;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Source Han Serif SC", "Noto Serif CJK SC", "SimSun", serif;
+    background: var(--bg); color: var(--ink); height: 100vh;
+    display: flex; flex-direction: column;
+  }
+  header {
+    padding: 14px 24px; background: var(--panel); border-bottom: 2px solid var(--line);
+    display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  }
+  header h1 { font-size: 20px; color: var(--accent); letter-spacing: 1px; }
+  header .sub { font-size: 12px; color: var(--muted); }
+  #status { font-size: 12px; color: var(--accent2); margin-left: auto; }
+  main { flex: 1; display: flex; min-height: 0; }
+  /* ---- 左：对话 ---- */
+  #chat-pane { flex: 1.2; display: flex; flex-direction: column; border-right: 2px solid var(--line); min-width: 0; }
+  #messages { flex: 1; overflow-y: auto; padding: 20px; }
+  .msg { max-width: 88%; margin-bottom: 14px; padding: 10px 14px; border-radius: 8px; line-height: 1.75; font-size: 14.5px; white-space: pre-wrap; word-break: break-word; }
+  .msg.user { background: #e8efe9; margin-left: auto; border: 1px solid #cddcd1; }
+  .msg.bot { background: var(--panel); border: 1px solid var(--line); }
+  .msg.refused { background: var(--refuse-bg); border: 1px solid var(--refuse-border); }
+  .msg .meta { display: block; margin-top: 8px; font-size: 11.5px; color: var(--muted); font-family: Consolas, monospace; }
+  .msg .cites { display: block; margin-top: 6px; font-size: 12px; color: var(--accent2); }
+  #input-bar { display: flex; gap: 8px; padding: 12px 16px; background: var(--panel); border-top: 1px solid var(--line); align-items: center; }
+  #input-bar textarea {
+    flex: 1; resize: none; height: 44px; padding: 10px; font-size: 14px;
+    border: 1px solid var(--line); border-radius: 6px; font-family: inherit; background: #fff;
+  }
+  #input-bar button, #input-bar select {
+    padding: 10px 16px; border: 1px solid var(--accent); background: var(--accent);
+    color: #fff; border-radius: 6px; cursor: pointer; font-size: 14px; font-family: inherit;
+  }
+  #input-bar select { background: var(--panel); color: var(--accent); }
+  #input-bar button.ghost { background: transparent; color: var(--muted); border-color: var(--line); }
+  /* ---- 右：证据与轨迹 ---- */
+  #side-pane { flex: 1; overflow-y: auto; padding: 16px; min-width: 380px; background: #faf8f2; }
+  #side-pane h2 { font-size: 15px; color: var(--accent); margin: 14px 0 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px; }
+  #side-pane h2:first-child { margin-top: 0; }
+  .ev-card {
+    background: var(--panel); border: 1px solid var(--line); border-radius: 6px;
+    padding: 10px 12px; margin-bottom: 8px; font-size: 12.5px;
+  }
+  .ev-card .ev-title { color: var(--accent); font-weight: bold; margin-bottom: 4px; }
+  .ev-card .ev-text { color: var(--ink); line-height: 1.6; max-height: 88px; overflow: hidden; }
+  .ev-card .ev-scores { margin-top: 6px; color: var(--muted); font-family: Consolas, monospace; font-size: 11px; }
+  .ev-card.dropped { opacity: 0.65; border-style: dashed; }
+  .ev-card.dropped .ev-title::after { content: "（二次过滤丢弃）"; color: var(--refuse-border); font-weight: normal; font-size: 11px; }
+  .trace-step { border-left: 3px solid var(--accent2); padding: 6px 10px; margin-bottom: 10px; background: var(--panel); border-radius: 0 6px 6px 0; font-size: 12.5px; }
+  .trace-step .t-label { font-family: Consolas, monospace; color: var(--accent2); font-size: 11px; }
+  .trace-step .t-thought { color: var(--ink); margin: 3px 0; line-height: 1.6; }
+  .trace-step .t-obs { color: var(--muted); white-space: pre-wrap; line-height: 1.5; font-size: 11.5px; }
+  .mem-block { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 10px 12px; font-size: 12.5px; line-height: 1.7; }
+  .badge { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 11px; margin-right: 4px; }
+  .badge.ok { background: #e3efe6; color: var(--accent2); }
+  .badge.no { background: var(--refuse-bg); color: var(--refuse-border); }
+  .empty { color: var(--muted); font-size: 12.5px; }
+  .cite { color: var(--accent2); cursor: pointer; border-bottom: 1px dashed var(--accent2); font-weight: bold; }
+  .cite:hover { background: #e3efe6; }
+  mark.hit { background: #ffe9b3; padding: 0 2px; border-radius: 2px; }
+  .ev-card.flash { animation: flash 1.6s ease; }
+  @keyframes flash { 0% { box-shadow: 0 0 0 3px var(--warn-border); } 100% { box-shadow: 0 0 0 0 transparent; } }
+</style>
+</head>
+<body>
+<header>
+  <h1>中医循证检索增强问答系统</h1>
+  <span class="sub">混合召回 · 重排 · 二次过滤 · ReAct 动态检索决策 · 分层记忆 · 证据引用可追溯</span>
+  <span id="status">加载中…</span>
+</header>
+<main>
+  <div id="chat-pane">
+    <div id="messages"></div>
+    <div id="input-bar">
+      <select id="mode" title="决策模式">
+        <option value="react">ReAct 动态决策</option>
+        <option value="static">Static 基线（一次检索直接答）</option>
+      </select>
+      <textarea id="input" placeholder="例如：桂枝汤的组成和主治是什么？（Enter 发送，Shift+Enter 换行）"></textarea>
+      <button id="send">发送</button>
+      <button id="reset" class="ghost" title="清空会话记忆">重置会话</button>
+    </div>
+  </div>
+  <div id="side-pane">
+    <h2>决策轨迹（CoT + ReAct）</h2>
+    <div id="trace"><span class="empty">提问后展示逐轮决策轨迹</span></div>
+    <h2>引用证据</h2>
+    <div id="evidences"><span class="empty">提问后展示证据卡片（含通道分数与 OCR 噪声度）</span></div>
+    <h2>记忆状态</h2>
+    <div id="memory" class="mem-block"><span class="empty">提问后刷新</span></div>
+  </div>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+const sessionId = "web_" + Math.random().toString(36).slice(2, 8);
+
+async function loadHealth() {
+  try {
+    const r = await fetch("/api/health"); const d = await r.json();
+    $("status").textContent = `语料 ${d.n_chunks} 块 · ${d.embedder} · LLM: ${d.llm === "offline_extractive" ? "离线抽取式" : d.llm}`;
+  } catch (e) { $("status").textContent = "服务未就绪"; }
+}
+
+function addMsg(cls, text, metaHtml) {
+  const div = document.createElement("div");
+  div.className = "msg " + cls;
+  if (cls.includes("bot") && !cls.includes("thinking")) {
+    div.innerHTML = renderAnswerHtml(text);   // bot 消息：解析〔n〕引用与**加粗**
+  } else {
+    div.textContent = text;
+  }
+  if (metaHtml) { const s = document.createElement("span"); s.innerHTML = metaHtml; div.appendChild(s); }
+  $("messages").appendChild(div);
+  $("messages").scrollTop = $("messages").scrollHeight;
+  return div;
+}
+
+function renderSide(res) {
+  // 轨迹
+  const tr = $("trace"); tr.innerHTML = "";
+  (res.trace || []).forEach(st => {
+    const d = document.createElement("div"); d.className = "trace-step";
+    d.innerHTML = `<span class="t-label">Round ${st.round} · Action: ${st.action}</span>
+      <div class="t-thought">💭 ${escapeHtml(st.thought)}</div>
+      ${st.action_input && st.action_input.query ? `<div class="t-obs">query: ${escapeHtml(st.action_input.query)}</div>` : ""}
+      <div class="t-obs">${escapeHtml((st.observation || "").slice(0, 400))}</div>`;
+    tr.appendChild(d);
+  });
+  if (!(res.trace || []).length) tr.innerHTML = '<span class="empty">无</span>';
+  // 证据（quote = 与问题最相关的命中句，行级高亮）
+  const ev = $("evidences"); ev.innerHTML = "";
+  (res.evidences || []).forEach((e, i) => {
+    let bodyHtml = escapeHtml(e.text);
+    const q = (e.quote || "").trim();
+    if (q) {
+      const qEsc = escapeHtml(q);
+      const idx = bodyHtml.indexOf(qEsc);
+      if (idx >= 0) {
+        bodyHtml = bodyHtml.slice(0, idx) + '<mark class="hit">' + qEsc + "</mark>" + bodyHtml.slice(idx + qEsc.length);
+      }
+    }
+    const d = document.createElement("div"); d.className = "ev-card"; d.id = "ev-card-" + (i + 1);
+    d.innerHTML = `<div class="ev-title">${escapeHtml(e.title || e.chunk_id)}</div>
+      <div class="ev-text">${bodyHtml}</div>
+      <div class="ev-scores">score=${e.score} · noise=${e.ocr_noise} · dense=${(e.channel_scores||{}).dense ?? "-"} · bm25=${(e.channel_scores||{}).bm25_norm ?? "-"} · rerank=${(e.channel_scores||{}).ce_api ?? (e.channel_scores||{}).feature_rerank ?? "-"}</div>`;
+    ev.appendChild(d);
+  });
+  if (!(res.evidences || []).length) ev.innerHTML = '<span class="empty">无保留证据</span>';
+  refreshMemory(res);
+}
+
+function refreshMemory(res) {
+  const m = $("memory"); const mu = res.memory_used || {};
+  const ltm = (mu.ltm_hits || []).map(h => `<div>· ${escapeHtml(h.content.slice(0, 60))}（score ${h.score.toFixed(2)}）</div>`).join("");
+  const writes = (mu.ltm_writes || []).map(w => `<div>· 写入[${w.action}] ${escapeHtml(w.content)}</div>`).join("");
+  m.innerHTML = `<div>短期记忆：活跃轮次 ${mu.stm_active_turns ?? 0}，摘要 ${mu.stm_summary_chars ?? 0} 字</div>
+    <div>长期记忆召回：${(mu.ltm_hits || []).length} 条</div>${ltm}${writes}`;
+}
+
+function escapeHtml(s) { return (s || "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+/* 答案文本 → HTML：〔n〕引用标记变为可点击锚点，滚动到对应证据卡 */
+function renderAnswerHtml(text) {
+  const html = escapeHtml(text).replace(
+    /〔(\d+)〕/g,
+    '<span class="cite" data-n="$1" title="点击查看对应证据">〔$1〕</span>'
+  );
+  return html.replace(/\*\*(.+?)\*\*/g, "<b>$1</b>");
+}
+
+document.getElementById("messages").addEventListener("click", (e) => {
+  const cite = e.target.closest(".cite");
+  if (!cite) return;
+  const n = cite.dataset.n;
+  const card = document.getElementById("ev-card-" + n);
+  if (card) {
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    card.classList.add("flash");
+    setTimeout(() => card.classList.remove("flash"), 1600);
+  }
+});
+
+async function send() {
+  const text = $("input").value.trim();
+  if (!text) return;
+  $("input").value = "";
+  addMsg("user", text);
+  const thinking = addMsg("bot", "检索与推理中…");
+  try {
+    const r = await fetch("/api/chat", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({message: text, session_id: sessionId, mode: $("mode").value})
+    });
+    const res = await r.json();
+    thinking.remove();
+    const cls = res.refused ? "bot refused" : "bot";
+    const badge = res.refused ? '<span class="badge no">证据不足拒答</span>' : '<span class="badge ok">证据支持</span>';
+    const cites = (res.citations || []).slice(0, 5).map(c => escapeHtml(c)).join("　");
+    addMsg(cls, res.answer,
+      `<span class="cites">${badge}${cites}</span>
+       <span class="meta">confidence=${(res.confidence||0).toFixed(2)} · consistency=${(res.consistency||0).toFixed(2)} · coverage=${(res.coverage||0).toFixed(2)} · rounds=${res.rounds_used} · ${Math.round(res.latency_ms)}ms</span>`);
+    renderSide(res);
+  } catch (e) {
+    thinking.textContent = "请求失败：" + e;
+  }
+}
+
+$("send").onclick = send;
+$("input").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
+$("reset").onclick = async () => {
+  await fetch("/api/session/" + sessionId, {method: "DELETE"});
+  $("messages").innerHTML = ""; $("trace").innerHTML = '<span class="empty">已重置</span>';
+};
+loadHealth();
+</script>
+</body>
+</html>

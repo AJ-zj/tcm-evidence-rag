@@ -1,0 +1,20 @@
+{
+  "神农本草经_ocr.md": {
+    "truth": "E:\\360MoveData\\Users\\zj\\Desktop\\项目\\求职项目\\02-中医循证检索增强问答系统\\data\\corpus_ground_truth\\神农本草经_clean.md",
+    "char_confused": 11,
+    "space_inserted": 51,
+    "punct_corrupted": 12,
+    "garbage_inserted": 3,
+    "char_duplicated": 52,
+    "char_error_rate": 0.0333
+  },
+  "温病条辨_扫描版.pdf": {
+    "truth": "E:\\360MoveData\\Users\\zj\\Desktop\\项目\\求职项目\\02-中医循证检索增强问答系统\\data\\corpus_ground_truth\\温病条辨_clean.md",
+    "char_confused": 28,
+    "space_inserted": 104,
+    "punct_corrupted": 5,
+    "garbage_inserted": 0,
+    "char_duplicated": 75,
+    "char_error_rate": 0.0368
+  }
+}

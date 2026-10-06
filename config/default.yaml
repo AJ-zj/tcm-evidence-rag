@@ -1,0 +1,95 @@
+project:
+  name: tcm-evidence-rag
+  data_dir: data
+  corpus_dir: data/corpus
+  processed_dir: data/processed
+  index_dir: data/index
+  reports_dir: reports
+  seed: 42
+
+parsing:
+  supported_exts: [".md", ".json", ".jsonl", ".pdf", ".txt"]
+  ocr_clean:
+    enabled: true
+  chunk:
+    target_tokens: 256      # 语义切分目标块大小
+    max_tokens: 480         # 单块硬上限（低于 BGE 512 截断线）
+    overlap_tokens: 32      # 句级重叠
+    min_tokens: 24          # 过小块合并阈值
+  baseline_chunk:
+    naive_truncate_tokens: 512   # 基线：整篇截断（用于信息保留率对比）
+
+embedding:
+  provider: bge             # bge | hash
+  model_name: BAAI/bge-small-zh-v1.5
+  dim: 512
+  batch_size: 64
+  hf_endpoint: https://hf-mirror.com   # 国内镜像；已有本地缓存时配合离线重试
+  query_instruction: "为这个句子生成表示以用于检索相关文章："
+
+index:
+  hnsw_m: 32
+  ef_construction: 200
+  ef_search: 128
+
+retrieval:
+  dense_top_k: 30
+  bm25_top_k: 30
+  rrf_k: 60
+  rerank_top_k: 12
+  final_top_k: 5
+  reranker: api               # feature | api | cross_encoder（api=远程 rerank 接口，免本地模型）
+  api_rerank_model: BAAI/bge-reranker-v2-m3
+  api_rerank_url: ""          # 缺省复用 llm.base_url
+  api_rerank_key: ""          # 缺省复用 llm.api_key
+  cross_encoder_model: BAAI/bge-reranker-base
+  secondary_filter:
+    enabled: true
+    min_rel_score: 0.30      # 重排归一分下限
+    ocr_noise_max: 0.18      # OCR 噪声率上限
+    min_chars: 24            # 证据最短字符数
+    dedup_jaccard: 0.72      # 近重复证据去重阈值
+
+agent:
+  max_rounds: 3
+  confidence_answer_threshold: 0.45   # 高于此值可作答
+  confidence_refusal_threshold: 0.33  # 低于此值直接拒答（实测：可答题最低0.44，超范围题最高0.30）
+  consistency_threshold: 0.50         # 证据一致性下限
+  coverage_target: 0.66               # 查询实体覆盖率目标
+
+memory:
+  short_term:
+    window_turns: 6
+    max_window_tokens: 900
+    importance_decay: 0.82
+    summary_max_tokens: 220
+  long_term:
+    merge_similarity: 0.88     # 相似度高于此值 → 合并/更新而非新写
+    write_importance_threshold: 0.50
+    recall_top_k: 3
+    conflict_policy: newer_wins   # newer_wins | importance_wins
+
+ner:
+  base_importance: 0.15
+  weights:
+    formula: 1.0
+    herb: 0.9
+    disease: 0.85
+    pattern: 0.85
+    symptom: 0.7
+    western_disease: 0.6
+    meridian: 0.45
+    other: 0.3
+  max_entity_bonus: 0.85
+
+llm:
+  provider: offline          # offline | openai_compatible（.env 的 LLM_PROVIDER 覆盖此项）
+  temperature: 0.2
+  max_tokens: 4096           # reasoning 模型的思考+回答共用此预算
+  timeout_seconds: 120
+
+evaluation:
+  test_set_size: 700
+  unanswerable_count: 30
+  recall_ks: [1, 5, 10, 30]
+  dialogues_for_memory_eval: 40

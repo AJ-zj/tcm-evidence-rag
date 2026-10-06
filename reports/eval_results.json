@@ -1,0 +1,399 @@
+{
+  "n_eval_items": 700,
+  "exp1_retrieval_ab": {
+    "ks": [
+      1,
+      5,
+      10,
+      30
+    ],
+    "n_queries": 670,
+    "modes": {
+      "dense": {
+        "recall@k": {
+          "1": 0.8143,
+          "5": 0.91,
+          "10": 0.9328,
+          "30": 0.9791
+        },
+        "precision@k": {
+          "1": 0.8254,
+          "5": 0.1881,
+          "10": 0.0967,
+          "30": 0.0339
+        },
+        "top1_accuracy": 0.8254,
+        "mrr": 0.867,
+        "elapsed_s": 37.2
+      },
+      "bm25": {
+        "recall@k": {
+          "1": 0.8188,
+          "5": 0.8965,
+          "10": 0.9244,
+          "30": 0.9687
+        },
+        "precision@k": {
+          "1": 0.8328,
+          "5": 0.1848,
+          "10": 0.0957,
+          "30": 0.0336
+        },
+        "top1_accuracy": 0.8328,
+        "mrr": 0.8688,
+        "elapsed_s": 55.5
+      },
+      "hybrid": {
+        "recall@k": {
+          "1": 0.8432,
+          "5": 0.9542,
+          "10": 0.9682,
+          "30": 0.9925
+        },
+        "precision@k": {
+          "1": 0.8552,
+          "5": 0.1979,
+          "10": 0.1004,
+          "30": 0.0345
+        },
+        "top1_accuracy": 0.8552,
+        "mrr": 0.8974,
+        "elapsed_s": 51.2
+      },
+      "hybrid_rerank": {
+        "recall@k": {
+          "1": 0.9063,
+          "5": 0.9701,
+          "10": 0.9771,
+          "30": 0.9925
+        },
+        "precision@k": {
+          "1": 0.9194,
+          "5": 0.2015,
+          "10": 0.1016,
+          "30": 0.0345
+        },
+        "top1_accuracy": 0.9194,
+        "mrr": 0.9433,
+        "elapsed_s": 65.6
+      },
+      "full": {
+        "recall@k": {
+          "1": 0.9063,
+          "5": 0.9701,
+          "10": 0.9771,
+          "30": 0.9925
+        },
+        "precision@k": {
+          "1": 0.9194,
+          "5": 0.2015,
+          "10": 0.1016,
+          "30": 0.0345
+        },
+        "top1_accuracy": 0.9194,
+        "mrr": 0.9433,
+        "elapsed_s": 60.5
+      }
+    }
+  },
+  "exp2_retention_ocr": {
+    "naive_truncation": {
+      "overall": 0.5153,
+      "sentences": 5535
+    },
+    "semantic_chunking": {
+      "overall": 0.8793,
+      "sentences": 5535
+    },
+    "improvement_abs": 0.364,
+    "improvement_relative": 0.751,
+    "by_source_type": {
+      "case": {
+        "naive": 0.1013,
+        "semantic": 0.9367
+      },
+      "classic": {
+        "naive": 0.0909,
+        "semantic": 0.9409
+      },
+      "ocr_scan": {
+        "naive": 0.1439,
+        "semantic": 0.8273
+      },
+      "qa": {
+        "naive": 0.9985,
+        "semantic": 0.8393
+      },
+      "textbook": {
+        "naive": 0.0272,
+        "semantic": 0.9206
+      }
+    },
+    "ocr_recovery": {
+      "神农本草经_ocr.md": {
+        "corruption": {
+          "char_confused": 11,
+          "space_inserted": 51,
+          "punct_corrupted": 12,
+          "garbage_inserted": 3,
+          "char_duplicated": 52,
+          "char_error_rate": 0.0333
+        },
+        "term_recall_raw": 0.9545,
+        "term_recall_cleaned": 1.0,
+        "char_acc_raw": 0.9735,
+        "char_acc_cleaned": 0.978,
+        "noise_raw": 0.0161,
+        "noise_cleaned": 0.0
+      },
+      "温病条辨_扫描版.pdf": {
+        "corruption": {
+          "char_confused": 28,
+          "space_inserted": 104,
+          "punct_corrupted": 5,
+          "garbage_inserted": 0,
+          "char_duplicated": 75,
+          "char_error_rate": 0.0368
+        },
+        "term_recall_raw": 0.8491,
+        "term_recall_cleaned": 0.9528,
+        "char_acc_raw": 0.9496,
+        "char_acc_cleaned": 0.955,
+        "noise_raw": 0.0222,
+        "noise_cleaned": 0.0
+      },
+      "_avg": {
+        "term_recall_raw": 0.9018,
+        "term_recall_cleaned": 0.9764,
+        "char_acc_raw": 0.9616,
+        "char_acc_cleaned": 0.9665
+      }
+    }
+  },
+  "exp3_e2e_static": {
+    "mode": "static",
+    "n_items": 700,
+    "faithfulness": 0.9403,
+    "context_precision": 0.9428,
+    "context_recall": 0.9716,
+    "answer_relevancy": 0.8014,
+    "refusal_accuracy_on_unanswerable": 0.0,
+    "over_refusal_on_answerable": 0.0,
+    "false_confidence_rate": 0.0254,
+    "avg_rounds": 1.0,
+    "avg_latency_ms": 100.7,
+    "avg_confidence": 0.8525,
+    "by_type": {
+      "qa": {
+        "n": 425,
+        "ctx_recall": 0.9969,
+        "ctx_precision": 0.9982,
+        "faithfulness": 0.9632,
+        "refusal_rate": 0.0
+      },
+      "classic": {
+        "n": 78,
+        "ctx_recall": 0.859,
+        "ctx_precision": 0.7487,
+        "faithfulness": 0.9601,
+        "refusal_rate": 0.0
+      },
+      "unanswerable": {
+        "n": 30,
+        "ctx_recall": NaN,
+        "ctx_precision": NaN,
+        "faithfulness": 0.9694,
+        "refusal_rate": 0.0
+      },
+      "multi_hop": {
+        "n": 33,
+        "ctx_recall": 1.0,
+        "ctx_precision": 0.9848,
+        "faithfulness": 0.75,
+        "refusal_rate": 0.0
+      },
+      "pattern": {
+        "n": 15,
+        "ctx_recall": 1.0,
+        "ctx_precision": 1.0,
+        "faithfulness": 0.9102,
+        "refusal_rate": 0.0
+      },
+      "herb": {
+        "n": 44,
+        "ctx_recall": 0.8864,
+        "ctx_precision": 0.6966,
+        "faithfulness": 0.9201,
+        "refusal_rate": 0.0
+      },
+      "disease": {
+        "n": 22,
+        "ctx_recall": 1.0,
+        "ctx_precision": 1.0,
+        "faithfulness": 0.9192,
+        "refusal_rate": 0.0
+      },
+      "formula": {
+        "n": 33,
+        "ctx_recall": 1.0,
+        "ctx_precision": 0.9697,
+        "faithfulness": 0.8855,
+        "refusal_rate": 0.0
+      },
+      "case": {
+        "n": 7,
+        "ctx_recall": 0.7619,
+        "ctx_precision": 0.7421,
+        "faithfulness": 0.9841,
+        "refusal_rate": 0.0
+      },
+      "diagnosis": {
+        "n": 13,
+        "ctx_recall": 1.0,
+        "ctx_precision": 0.9,
+        "faithfulness": 0.812,
+        "refusal_rate": 0.0
+      }
+    },
+    "elapsed_s": 116.9
+  },
+  "exp3_e2e_react": {
+    "mode": "react",
+    "n_items": 700,
+    "faithfulness": 0.9395,
+    "context_precision": 0.9436,
+    "context_recall": 0.9731,
+    "answer_relevancy": 0.8014,
+    "refusal_accuracy_on_unanswerable": 0.9,
+    "over_refusal_on_answerable": 0.0,
+    "false_confidence_rate": 0.0239,
+    "avg_rounds": 1.1,
+    "avg_latency_ms": 93.3,
+    "avg_confidence": 0.8558,
+    "by_type": {
+      "qa": {
+        "n": 425,
+        "ctx_recall": 0.9969,
+        "ctx_precision": 0.9982,
+        "faithfulness": 0.9632,
+        "refusal_rate": 0.0
+      },
+      "classic": {
+        "n": 78,
+        "ctx_recall": 0.8718,
+        "ctx_precision": 0.7551,
+        "faithfulness": 0.9533,
+        "refusal_rate": 0.0
+      },
+      "unanswerable": {
+        "n": 30,
+        "ctx_recall": NaN,
+        "ctx_precision": NaN,
+        "faithfulness": 0.8963,
+        "refusal_rate": 0.9
+      },
+      "multi_hop": {
+        "n": 33,
+        "ctx_recall": 1.0,
+        "ctx_precision": 0.9848,
+        "faithfulness": 0.75,
+        "refusal_rate": 0.0
+      },
+      "pattern": {
+        "n": 15,
+        "ctx_recall": 1.0,
+        "ctx_precision": 1.0,
+        "faithfulness": 0.9102,
+        "refusal_rate": 0.0
+      },
+      "herb": {
+        "n": 44,
+        "ctx_recall": 0.8864,
+        "ctx_precision": 0.6966,
+        "faithfulness": 0.9201,
+        "refusal_rate": 0.0
+      },
+      "disease": {
+        "n": 22,
+        "ctx_recall": 1.0,
+        "ctx_precision": 1.0,
+        "faithfulness": 0.9192,
+        "refusal_rate": 0.0
+      },
+      "formula": {
+        "n": 33,
+        "ctx_recall": 1.0,
+        "ctx_precision": 0.9697,
+        "faithfulness": 0.8855,
+        "refusal_rate": 0.0
+      },
+      "case": {
+        "n": 7,
+        "ctx_recall": 0.7619,
+        "ctx_precision": 0.7421,
+        "faithfulness": 0.9841,
+        "refusal_rate": 0.0
+      },
+      "diagnosis": {
+        "n": 13,
+        "ctx_recall": 1.0,
+        "ctx_precision": 0.9,
+        "faithfulness": 0.812,
+        "refusal_rate": 0.0
+      }
+    },
+    "elapsed_s": 107.1
+  },
+  "exp4_latency": {
+    "n_queries": 300,
+    "hnsw_search_ms": {
+      "p50": 0.29,
+      "p95": 0.37,
+      "p99": 0.43,
+      "mean": 0.3,
+      "max": 0.54
+    },
+    "full_pipeline_ms": {
+      "p50": 25.55,
+      "p95": 39.39,
+      "p99": 44.18,
+      "mean": 23.63,
+      "max": 61.78
+    },
+    "index_size": 1067,
+    "dim": 512
+  },
+  "exp5_memory": {
+    "n_dialogues": 40,
+    "memory_off": {
+      "anaphora_hit_rate": 0.025,
+      "anaphora_error_rate": 0.775,
+      "anaphora_refusal_rate": 0.2,
+      "direct_question_hit_rate": 0.9125,
+      "avg_latency_ms": 115.3
+    },
+    "memory_on": {
+      "anaphora_hit_rate": 0.7125,
+      "anaphora_error_rate": 0.2875,
+      "anaphora_refusal_rate": 0.0,
+      "direct_question_hit_rate": 0.9125,
+      "avg_latency_ms": 189.5
+    },
+    "delta_hit_rate": 0.6875,
+    "delta_error_rate": -0.4875,
+    "long_term_stats": {
+      "n_records": 64,
+      "n_active": 63,
+      "stats": {
+        "writes_attempted": 400,
+        "inserted": 63,
+        "merged": 126,
+        "rejected_low_importance": 210,
+        "conflicts_detected": 1,
+        "superseded": 1,
+        "conflict_rejected": 0
+      }
+    }
+  },
+  "generated_at": "2026-10-06 00:59:40"
+}

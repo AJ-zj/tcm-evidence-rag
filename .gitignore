@@ -1,0 +1,20 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+data/index/
+data/db/
+data/processed/
+data/corpus/ocr/
+data/corpus/pdf/
+data/corpus/qa/
+!reports/.gitkeep
+.env
+*.egg-info/
+.DS_Store
+
+# 原始数据集（138MB 超 GitHub 单文件限制，按 README 说明自行下载）
+data/raw/
+
+# 简历材料（本地保留，不进公开仓库）
+reports/RESUME_*.md
