@@ -36,7 +36,7 @@ CREATE INDEX IF NOT EXISTS idx_chunks_doc ON chunks(doc_id);
 class ChunkStore:
     """分块存储：内存缓存 + SQLite 持久化（双写）。"""
 
-    def __init__(self, db_path: str | Path | None = None):
+    def __init__(self, db_path: str | Path | None = None, reset: bool = False):
         self.db_path = Path(db_path) if db_path else None
         self._lock = threading.Lock()
         self._chunks: dict[str, Chunk] = {}
@@ -45,6 +45,9 @@ class ChunkStore:
             self.db_path.parent.mkdir(parents=True, exist_ok=True)
             with self._conn() as conn:
                 conn.executescript(_SCHEMA)
+                if reset:
+                    # 全量重建语义：清空旧块，避免向量索引与块库不一致（LTM/会话表不受影响）
+                    conn.execute("DELETE FROM chunks")
             self._load_from_db()
 
     def _conn(self) -> sqlite3.Connection:

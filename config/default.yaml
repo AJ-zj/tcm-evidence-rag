@@ -56,6 +56,7 @@ agent:
   confidence_refusal_threshold: 0.33  # 低于此值直接拒答（实测：可答题最低0.44，超范围题最高0.30）
   consistency_threshold: 0.50         # 证据一致性下限
   coverage_target: 0.66               # 查询实体覆盖率目标
+  fallback_general_knowledge: true    # 拒答后用LLM通用知识兜底（明确免责标注，仅LLM模式生效）
 
 memory:
   short_term:

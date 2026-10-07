@@ -95,6 +95,7 @@ class AgentAnswer:
     coverage: float = 0.0
     refused: bool = False
     refusal_reason: str = ""
+    fallback_used: bool = False        # 拒答后是否触发了"通用知识兜底"（内容未经语料验证）
     rounds_used: int = 0
     trace: list[TraceStep] = field(default_factory=list)
     memory_used: dict[str, Any] = field(default_factory=dict)

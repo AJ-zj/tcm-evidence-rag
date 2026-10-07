@@ -171,6 +171,36 @@ def test_signals_structure():
     assert 0.0 <= sig["consistency"] <= 1.0
 
 
+class _FakeLLM:
+    """最小 LLM 桩：记录调用并返回固定文本。"""
+    def __init__(self):
+        self.calls = []
+    def complete(self, system, user, **kw):
+        self.calls.append((system, user))
+        return "生姜性温，可辅助驱寒（通用知识回答）。"
+
+
+def test_refusal_fallback_with_llm():
+    """配置 LLM 时，拒答应触发通用知识兜底并明确标注。"""
+    agent, _ = make_agent()
+    fake = _FakeLLM()
+    agent.llm = fake
+    res = agent.answer("量子计算机的工作温度是多少？")
+    if res.refused:
+        assert res.fallback_used
+        assert "通用知识" in res.answer
+        assert any("通用中医知识" in s for s, _u in fake.calls)
+        assert any(s.action == "fallback_general_knowledge" for s in res.trace)
+
+
+def test_refusal_offline_no_fallback():
+    """离线模式（无 LLM）拒答时不触发兜底。"""
+    agent, _ = make_agent()   # llm=None
+    res = agent.answer("量子计算机的工作温度是多少？")
+    if res.refused:
+        assert not res.fallback_used
+
+
 def test_answer_dict_serializable():
     import json
 

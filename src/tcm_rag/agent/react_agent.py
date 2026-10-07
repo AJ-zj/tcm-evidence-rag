@@ -349,6 +349,7 @@ class EvidenceAgent:
 
         # ---- 终局判定 ----
         refused = False
+        fallback_used = False
         if decision == "refuse":
             refused = True
         elif signals["confidence"] < self.refusal_threshold:
@@ -380,9 +381,37 @@ class EvidenceAgent:
                     else "\n建议：补充更权威的资料来源，或将问题拆解为更具体的中医术语后重试。"
                 )
             )
+
+            # 通用知识兜底（可选开关，仅 LLM 模式）：不装懂也不让用户空手而归。
+            # refused 标志保持 True——"语料证据不足"的系统判断不变，兜底内容明确免责。
+            fallback_used = False
+            if self.llm is not None and self.cfg.get("agent.fallback_general_knowledge", True):
+                try:
+                    gk = self.llm.complete(
+                        "你是中医问答助手。本系统的知识库中没有检索到与该问题相关的证据，"
+                        "请基于你自己的通用中医知识回答用户，要求：1)开头注明这是通用知识而非语料证据；"
+                        "2)如涉及用药请提醒咨询执业中医师；3)保持简洁。",
+                        question,
+                        max_tokens=1500,
+                    )
+                    answer_text = (
+                        "⚠ **以下回答来自模型通用知识，未经本系统语料证据支持，请咨询执业中医师后再参考。**\n\n"
+                        f"【语料检索情况】{refusal_reason or '未检索到相关证据'}\n\n"
+                        f"【通用知识补充】\n{gk}"
+                    )
+                    fallback_used = True
+                    trace.append(TraceStep(
+                        rounds_used - 1,
+                        "语料证据不足，触发通用知识兜底（明确免责标注，不计入循证回答）。",
+                        "fallback_general_knowledge", {}, "已生成免责标注的通用知识回答",
+                    ))
+                except LLMError:
+                    fallback_used = False   # LLM 不可用则保持纯拒答
+
             result = AgentAnswer(
                 question=question, answer=answer_text, refused=True,
                 refusal_reason=refusal_reason or "insufficient_evidence",
+                fallback_used=fallback_used,
             )
             return self._finalize(
                 question, result, top, signals, trace, t_start,

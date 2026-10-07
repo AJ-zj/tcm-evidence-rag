@@ -166,8 +166,9 @@ class RAGSystem:
         bm25.build(chunks)
 
         # 双库：SQLite 存结构化数据（分块/记忆/会话），FAISS 存向量索引
+        # reset=True：重建时清空旧块表（保留长期记忆与会话），保证与向量索引一致
         db_path = cls._db_path(cfg)
-        store = ChunkStore(db_path=db_path)
+        store = ChunkStore(db_path=db_path, reset=True)
         store.add(chunks)
         hnsw.save(index_dir / "hnsw")
         bm25.save(index_dir / "bm25.pkl")
