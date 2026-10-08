@@ -1,0 +1,31 @@
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+预热加载索引与模型…
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 1008.62it/s]
+Building prefix dict from the default dictionary ...
+Loading model from cache C:\Users\zj\AppData\Local\Temp\jieba.cache
+Loading model cost 1.327 seconds.
+Prefix dict has been built successfully.
+INFO:     Started server process [25784]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8100 (Press CTRL+C to quit)
+系统加载完成：1373 块，embedder=BAAI/bge-small-zh-v1.5，reranker=api_cross_encoder
+启动服务： http://127.0.0.1:8100
+INFO:     127.0.0.1:62537 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64957 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64957 - "GET /api/health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49481 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:61727 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57926 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51143 - "DELETE /api/session/web_lcx7go HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49360 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60835 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58647 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62653 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53452 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64944 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54910 - "DELETE /api/session/web_lcx7go HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62261 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:53219 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59037 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64944 - "POST /api/chat HTTP/1.1" 200 OK
