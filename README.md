@@ -100,7 +100,26 @@ py -3.12 -m venv .venv
 ## 评估结果（实测）
 
 > 复现命令：`scripts/run_eval.py`。语料 610 文档 / 1067 块；测试集 700 条（670 可答 + 30 不可答）；全程离线、固定种子可复现。
-> 以下数字由本仓库代码实际运行产出，完整报告见 [`reports/eval_report.md`](reports/eval_report.md)，逐题明细见 `reports/e2e_rows_*.jsonl`。
+> 以下数字由本仓库代码实际运行产出。实验一检索 A/B 明细见 [`reports/eval_results_reranker_api.json`](reports/eval_results_reranker_api.json)（复现：`scripts/run_reranker_eval.py --reranker api`），逐题明细见 `reports/e2e_rows_*.jsonl`。
+> **`reports/` 下保留了两批不同运行的结果，数字不可直接互比**；对外引用与答辩请统一以本页为准，见下方「评测口径说明」。
+
+### 评测口径说明：`reports/` 下的两批运行结果
+
+本页「评估结果」与 [`reports/eval_report.md`](reports/eval_report.md) 来自**两次不同的评测运行**，测试集规模与重排配置均不同，指标不可直接互比；简历、答辩与对外引用统一以本页为准。
+
+| | 本页表格（推荐引用） | `eval_report.md` / `eval_results.json` |
+|---|---|---|
+| 生成脚本 | `scripts/run_reranker_eval.py --reranker api` | `scripts/run_eval.py` |
+| 明细文件 | `reports/eval_results_reranker_api.json` | `reports/eval_results.json`、`reports/e2e_rows_*.jsonl` |
+| 样本量 | `n_queries=670`（测试集 700 条：670 可答 + 30 不可答） | `n_eval_items=699`、`exp1.n_queries=669` |
+| 重排后端 | API CrossEncoder（SiliconFlow `BAAI/bge-reranker-v2-m3`） | 默认配置的完整管线 |
+| 检索 A/B Top-1 | 82.5% → 97.5% | 87.7% → 98.5% |
+| 检索 A/B Recall@1 / MRR | 81.4% → 96.3% / 0.867 → 0.983 | 86.7% → 97.3% / 0.905 → 0.990 |
+
+实验二（长文保留 / OCR）、实验三（端到端 RAGAS 与拒答）在两份记录中同样来自不同批次，数值存在差异，请勿交叉引用。另有两套独立复核实验，不属于上述任一评测批次：
+
+- `reports/ragas_official.json`：官方 RAGAS v0.4.3 对 40 题复核（裁判 Qwen2.5-7B-Instruct，faithfulness 0.9543），与内置离线规则实现是两套裁判口径，见「实验三·对照」。
+- `reports/faithfulness_experiment.json`：48 题生成方式对照（40 可答 + 8 不可答），见「实验三·补充」。
 
 ### 实验一：检索架构 A/B（670 条可答题）
 
