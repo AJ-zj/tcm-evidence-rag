@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "generated_by": "scripts/export_metrics_index.py",
+  "generated_at": "2026-11-05T10:40:53Z",
+  "description": "简历与 README 中所有量化指标的明细出处索引。每个条目含值、来源文件、字段路径、样本量与复现命令。",
+  "caveats": [
+    "本仓库存在两批不同评测运行（670 题 API 重排 / 699 题默认管线），数字不可直接互比。",
+    "README 实验二、三表格中的部分展示值没有对应明细文件；本索引只收录可从 reports/ 与 config/ 追溯的值。",
+    "官方 RAGAS 与生成方式对照是两套独立复核实验，不属于上述任一评测批次。"
+  ],
+  "metrics": [
+    {
+      "name": "检索 Top-1 基线",
+      "display": "82.5%",
+      "value": 82.54,
+      "source": "reports/eval_results_reranker_api.json",
+      "field": "modes.dense.top1_accuracy",
+      "sample": "n_queries=670",
+      "reproduce": "python scripts/run_reranker_eval.py --reranker api"
+    },
+    {
+      "name": "检索 Top-1 全管线",
+      "display": "97.5%",
+      "value": 97.46,
+      "source": "reports/eval_results_reranker_api.json",
+      "field": "modes.full.top1_accuracy (= modes.hybrid_rerank)",
+      "sample": "n_queries=670",
+      "reproduce": "python scripts/run_reranker_eval.py --reranker api"
+    },
+    {
+      "name": "检索 Top-1 绝对提升",
+      "display": "+15.0pp",
+      "value": 14.92,
+      "source": "reports/eval_results_reranker_api.json",
+      "field": "modes.full.top1_accuracy - modes.dense.top1_accuracy",
+      "sample": "n_queries=670",
+      "reproduce": "python scripts/run_reranker_eval.py --reranker api",
+      "note": "由两端字段相减得到，JSON 内无单独的提升字段"
+    },
+    {
+      "name": "RRF 融合阶段贡献",
+      "display": "+3.0pp",
+      "value": 2.98,
+      "source": "reports/eval_results_reranker_api.json",
+      "field": "modes.hybrid.top1_accuracy - modes.dense.top1_accuracy",
+      "sample": "n_queries=670",
+      "reproduce": "python scripts/run_reranker_eval.py --reranker api"
+    },
+    {
+      "name": "重排阶段贡献",
+      "display": "+11.9pp",
+      "value": 11.94,
+      "source": "reports/eval_results_reranker_api.json",
+      "field": "modes.full.top1_accuracy - modes.hybrid.top1_accuracy",
+      "sample": "n_queries=670",
+      "reproduce": "python scripts/run_reranker_eval.py --reranker api",
+      "note": "README 表格另有「hybrid + 特征重排」中间档，该档未落盘 JSON，故不纳入索引"
+    },
+    {
+      "name": "Recall@1 基线 / 全管线",
+      "display": "81.4% → 96.3%",
+      "value": [
+        81.43,
+        96.26
+      ],
+      "source": "reports/eval_results_reranker_api.json",
+      "field": "modes.dense.recall@k.1 → modes.full.recall@k.1",
+      "sample": "n_queries=670",
+      "reproduce": "python scripts/run_reranker_eval.py --reranker api"
+    },
+    {
+      "name": "MRR 基线 / 全管线",
+      "display": "0.867 → 0.983",
+      "value": [
+        0.867,
+        0.9829
+      ],
+      "source": "reports/eval_results_reranker_api.json",
+      "field": "modes.dense.mrr → modes.full.mrr",
+      "sample": "n_queries=670",
+      "reproduce": "python scripts/run_reranker_eval.py --reranker api"
+    },
+    {
+      "name": "重排后端",
+      "display": "API CrossEncoder",
+      "value": "BAAI/bge-reranker-v2-m3",
+      "source": "reports/eval_results_reranker_api.json",
+      "field": "reranker / reranker_model",
+      "sample": "n_queries=670",
+      "reproduce": "python scripts/run_reranker_eval.py --reranker api"
+    },
+    {
+      "name": "默认管线 Top-1",
+      "display": "87.7% → 98.5%",
+      "value": [
+        87.74,
+        98.51
+      ],
+      "source": "reports/eval_results.json",
+      "field": "exp1_retrieval_ab.modes.dense/full.top1_accuracy",
+      "sample": "n_eval_items=699, exp1.n_queries=669",
+      "reproduce": "python scripts/run_eval.py"
+    },
+    {
+      "name": "长文信息保留率",
+      "display": "59.5% → 87.8%",
+      "value": [
+        59.47,
+        87.83
+      ],
+      "source": "reports/eval_results.json",
+      "field": "exp2_retention_ocr.naive_truncation.overall → semantic_chunking.overall",
+      "sample": "sentences=6622",
+      "reproduce": "python scripts/run_eval.py",
+      "note": "README 实验二表格写 51.5%→87.9%，属另一批次展示值，仓库无对应明细文件"
+    },
+    {
+      "name": "OCR 医药术语恢复率",
+      "display": "90.2% → 97.6%",
+      "value": [
+        90.18,
+        97.64
+      ],
+      "source": "reports/eval_results.json",
+      "field": "exp2_retention_ocr.ocr_recovery._avg.term_recall_raw → term_recall_cleaned",
+      "sample": "模拟 OCR 文档平均",
+      "reproduce": "python scripts/run_eval.py"
+    },
+    {
+      "name": "static 超范围题拒答正确率",
+      "display": "0/30 = 0.0%",
+      "value": 0.0,
+      "source": "reports/e2e_rows_static.jsonl",
+      "field": "逐行统计 type=='unanswerable' 且 refused==true",
+      "sample": "总 699 行，不可答 30 条",
+      "reproduce": "python scripts/run_eval.py",
+      "note": "可直接由本文件逐题重算"
+    },
+    {
+      "name": "static 可答题过度拒答",
+      "display": "0/669",
+      "value": 0,
+      "source": "reports/e2e_rows_static.jsonl",
+      "field": "逐行统计 type!='unanswerable' 且 refused==true",
+      "sample": "可答 669 条",
+      "reproduce": "python scripts/run_eval.py"
+    },
+    {
+      "name": "react 超范围题拒答正确率",
+      "display": "30/30 = 100.0%",
+      "value": 1.0,
+      "source": "reports/e2e_rows_react.jsonl",
+      "field": "逐行统计 type=='unanswerable' 且 refused==true",
+      "sample": "总 699 行，不可答 30 条",
+      "reproduce": "python scripts/run_eval.py",
+      "note": "可直接由本文件逐题重算"
+    },
+    {
+      "name": "react 可答题过度拒答",
+      "display": "0/669",
+      "value": 0,
+      "source": "reports/e2e_rows_react.jsonl",
+      "field": "逐行统计 type!='unanswerable' 且 refused==true",
+      "sample": "可答 669 条",
+      "reproduce": "python scripts/run_eval.py"
+    },
+    {
+      "name": "端到端拒答提升",
+      "display": "0% → 100%",
+      "value": [
+        0.0,
+        1.0
+      ],
+      "source": "reports/eval_results.json",
+      "field": "exp3_e2e_static.refusal_accuracy_on_unanswerable → exp3_e2e_react",
+      "sample": "n_items=699",
+      "reproduce": "python scripts/run_eval.py",
+      "note": "与 e2e_rows_*.jsonl 逐题重算一致；README 实验三表格的 90.0% 与本明细不符，不采用"
+    },
+    {
+      "name": "生成方式对照忠实度",
+      "display": "56.0% → 88.8%",
+      "value": [
+        56.03,
+        88.81
+      ],
+      "source": "reports/faithfulness_experiment.json",
+      "field": "summary.faithfulness_free_generation → faithfulness_rag_grounded",
+      "sample": "n_answerable=40 + n_unanswerable=8 = 48 题",
+      "reproduce": "python scripts/run_faithfulness_experiment.py"
+    },
+    {
+      "name": "超范围题硬答率",
+      "display": "62.5% → 0%",
+      "value": [
+        62.5,
+        0.0
+      ],
+      "source": "reports/faithfulness_experiment.json",
+      "field": "summary.free_hard_answer_rate_on_unanswerable → (1 - rag_refusal_rate_on_unanswerable)",
+      "sample": "n_unanswerable=8（8 条，非 48 题总体）",
+      "reproduce": "python scripts/run_faithfulness_experiment.py",
+      "note": "硬答率分母是 8 条不可答题，不可写成 48 题的硬答率"
+    },
+    {
+      "name": "官方 RAGAS Faithfulness",
+      "display": "0.954",
+      "value": 0.9543,
+      "source": "reports/ragas_official.json",
+      "field": "summary.faithfulness",
+      "sample": "n=40, judge=Qwen/Qwen2.5-7B-Instruct",
+      "reproduce": "python scripts/run_ragas_official.py",
+      "note": "与内置离线规则实现是两套裁判口径，不可互比"
+    },
+    {
+      "name": "测试集规模",
+      "display": "700 条（670 可答 + 30 不可答）",
+      "value": 700,
+      "source": "config/default.yaml",
+      "field": "evaluation.test_set_size / evaluation.unanswerable_count / seed",
+      "sample": "seed=42",
+      "reproduce": "python scripts/make_eval_set.py",
+      "note": "逐题明细见 reports/e2e_rows_*.jsonl（699 行）"
+    },
+    {
+      "name": "语料规模",
+      "display": "610 篇 / 1067 块",
+      "value": 1067,
+      "source": "README.md",
+      "field": "第 102 / 256 行语料规模说明（非 JSON 字段）",
+      "sample": "教学演示规模",
+      "reproduce": "python scripts/build_corpus.py",
+      "note": "仓库未提交语料统计 JSON；1067 亦见 FAISS-HNSW ntotal 说明。此项为 README 记录值，非评测产物字段"
+    }
+  ]
+}

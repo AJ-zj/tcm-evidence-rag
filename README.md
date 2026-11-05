@@ -101,11 +101,11 @@ py -3.12 -m venv .venv
 
 > 复现命令：`scripts/run_eval.py`。语料 610 文档 / 1067 块；测试集 700 条（670 可答 + 30 不可答）；全程离线、固定种子可复现。
 > 以下数字由本仓库代码实际运行产出。实验一检索 A/B 明细见 [`reports/eval_results_reranker_api.json`](reports/eval_results_reranker_api.json)（复现：`scripts/run_reranker_eval.py --reranker api`），逐题明细见 `reports/e2e_rows_*.jsonl`。
-> **`reports/` 下保留了两批不同运行的结果，数字不可直接互比**；对外引用与答辩请统一以本页为准，见下方「评测口径说明」。
+> **`reports/` 下保留了两批不同运行的结果，数字不可直接互比**；对外引用与答辩请统一以 [`reports/metrics_index.json`](reports/metrics_index.json) 中可追溯的明细值为准，见下方「评测口径说明」与「指标明细索引」。
 
 ### 评测口径说明：`reports/` 下的两批运行结果
 
-本页「评估结果」与 [`reports/eval_report.md`](reports/eval_report.md) 来自**两次不同的评测运行**，测试集规模与重排配置均不同，指标不可直接互比；简历、答辩与对外引用统一以本页为准。
+本页「评估结果」与 [`reports/eval_report.md`](reports/eval_report.md) 来自**两次不同的评测运行**，测试集规模与重排配置均不同，指标不可直接互比；简历、答辩与对外引用统一以 `reports/metrics_index.json` 中有明细字段支撑的值为准。
 
 | | 本页表格（推荐引用） | `eval_report.md` / `eval_results.json` |
 |---|---|---|
@@ -120,6 +120,24 @@ py -3.12 -m venv .venv
 
 - `reports/ragas_official.json`：官方 RAGAS v0.4.3 对 40 题复核（裁判 Qwen2.5-7B-Instruct，faithfulness 0.9543），与内置离线规则实现是两套裁判口径，见「实验三·对照」。
 - `reports/faithfulness_experiment.json`：48 题生成方式对照（40 可答 + 8 不可答），见「实验三·补充」。
+
+### 指标明细索引（简历 / 答辩引用口径）
+
+[`reports/metrics_index.json`](reports/metrics_index.json) 由 `python scripts/export_metrics_index.py` 只读汇总 `reports/` 与 `config/` 生成，逐条给出指标值、来源文件、字段路径、样本量与复现命令，不新增实验数据。对外引用统一采用下表有明细字段支撑的值：
+
+| 指标 | 引用值 | 明细文件 · 字段 | 复现命令 |
+|---|---|---|---|
+| 检索 Top-1 | 82.5% → 97.5%（+15.0pp） | `eval_results_reranker_api.json` `modes.dense/full.top1_accuracy` | `scripts/run_reranker_eval.py --reranker api` |
+| Recall@1 / MRR | 81.4% → 96.3% / 0.867 → 0.983 | 同上 `recall@k.1` / `mrr` | 同上 |
+| 长文信息保留率 | 59.5% → 87.8% | `eval_results.json` `exp2_retention_ocr.*.overall`（6622 句） | `scripts/run_eval.py` |
+| OCR 术语恢复率 | 90.2% → 97.6% | `eval_results.json` `exp2_retention_ocr.ocr_recovery._avg` | `scripts/run_eval.py` |
+| 超范围题拒答正确率 | 0% → 100%（30/30） | `e2e_rows_*.jsonl` 逐题 `refused`；`eval_results.json` `exp3_e2e_*` | `scripts/run_eval.py` |
+| 生成对照忠实度 | 56.0% → 88.8%（48 题） | `faithfulness_experiment.json` `summary.faithfulness_*` | `scripts/run_faithfulness_experiment.py` |
+| 超范围题硬答率 | 62.5% → 0%（分母 8 条） | `faithfulness_experiment.json` `free_hard_answer_rate_on_unanswerable` / `rag_refusal_rate_on_unanswerable` | 同上 |
+| 官方 RAGAS Faithfulness | 0.954（40 题） | `ragas_official.json` `summary.faithfulness` | `scripts/run_ragas_official.py` |
+| 测试集 / 语料规模 | 700 条（670+30）/ 1067 块 | `config/default.yaml` `evaluation.*` / 本页语料说明 | `scripts/make_eval_set.py` / `scripts/build_corpus.py` |
+
+**引用约定**：本页实验二表格的「51.5% → 87.9%」与实验三表格的「拒答 90.0%」为展示批次值，仓库内没有对应的评测明细文件；其中拒答率还与 `reports/e2e_rows_react.jsonl` 逐题重算结果（30/30 = 100%）不一致。因此简历与答辩统一采用上表有明细字段支撑的值。两批运行不可互比；官方 RAGAS 与生成方式对照是两套独立复核实验，不并入任一评测批次。硬答率的分母是 8 条超范围题，不是 48 题总体。
 
 ### 实验一：检索架构 A/B（670 条可答题）
 
