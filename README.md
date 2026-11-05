@@ -107,7 +107,7 @@ py -3.12 -m venv .venv
 
 本页「评估结果」与 [`reports/eval_report.md`](reports/eval_report.md) 来自**两次不同的评测运行**，测试集规模与重排配置均不同，指标不可直接互比；简历、答辩与对外引用统一以 `reports/metrics_index.json` 中有明细字段支撑的值为准。
 
-| | 本页表格（推荐引用） | `eval_report.md` / `eval_results.json` |
+| | 批次 A：本页实验一（检索指标推荐引用） | 批次 B：本页实验二/三/四/五、`eval_report.md` |
 |---|---|---|
 | 生成脚本 | `scripts/run_reranker_eval.py --reranker api` | `scripts/run_eval.py` |
 | 明细文件 | `reports/eval_results_reranker_api.json` | `reports/eval_results.json`、`reports/e2e_rows_*.jsonl` |
@@ -115,8 +115,10 @@ py -3.12 -m venv .venv
 | 重排后端 | API CrossEncoder（SiliconFlow `BAAI/bge-reranker-v2-m3`） | 默认配置的完整管线 |
 | 检索 A/B Top-1 | 82.5% → 97.5% | 87.7% → 98.5% |
 | 检索 A/B Recall@1 / MRR | 81.4% → 96.3% / 0.867 → 0.983 | 86.7% → 97.3% / 0.905 → 0.990 |
+| 长文信息保留率 / OCR | 该批次未运行 | 59.5% → 87.8%（6622 句）/ 90.2% → 97.6% |
+| 超范围题拒答 | 该批次未运行 | 0/30 → 30/30（0% → 100%） |
 
-实验二（长文保留 / OCR）、实验三（端到端 RAGAS 与拒答）在两份记录中同样来自不同批次，数值存在差异，请勿交叉引用。另有两套独立复核实验，不属于上述任一评测批次：
+实验二（长文保留 / OCR）、实验三（拒答正确率）已按批次 B 的明细字段与逐题记录**同步修正**，与 `reports/metrics_index.json` 一致；实验一属于批次 A，**跨实验数字仍不可互比**。实验三表格其余指标为展示批次记录值，同批明细见 `reports/eval_report.md`。另有两套独立复核实验，不属于上述任一评测批次：
 
 - `reports/ragas_official.json`：官方 RAGAS v0.4.3 对 40 题复核（裁判 Qwen2.5-7B-Instruct，faithfulness 0.9543），与内置离线规则实现是两套裁判口径，见「实验三·对照」。
 - `reports/faithfulness_experiment.json`：48 题生成方式对照（40 可答 + 8 不可答），见「实验三·补充」。
@@ -137,7 +139,7 @@ py -3.12 -m venv .venv
 | 官方 RAGAS Faithfulness | 0.954（40 题） | `ragas_official.json` `summary.faithfulness` | `scripts/run_ragas_official.py` |
 | 测试集 / 语料规模 | 700 条（670+30）/ 1067 块 | `config/default.yaml` `evaluation.*` / 本页语料说明 | `scripts/make_eval_set.py` / `scripts/build_corpus.py` |
 
-**引用约定**：本页实验二表格的「51.5% → 87.9%」与实验三表格的「拒答 90.0%」为展示批次值，仓库内没有对应的评测明细文件；其中拒答率还与 `reports/e2e_rows_react.jsonl` 逐题重算结果（30/30 = 100%）不一致。因此简历与答辩统一采用上表有明细字段支撑的值。两批运行不可互比；官方 RAGAS 与生成方式对照是两套独立复核实验，不并入任一评测批次。硬答率的分母是 8 条超范围题，不是 48 题总体。
+**引用约定**：本页实验二表格的「59.5% → 87.8%」与实验三表格的「拒答 0/30 → 30/30 = 100%」均已替换为有明细字段支撑的值（前者见 `eval_results.json` `exp2_retention_ocr`，后者可由 `e2e_rows_*.jsonl` 逐题重算），与 `metrics_index.json` 完全一致。实验三表格其余指标仍为展示批次记录值，简历与答辩统一采用上表有明细字段支撑的值。两批运行不可互比；官方 RAGAS 与生成方式对照是两套独立复核实验，不并入任一评测批次。硬答率的分母是 8 条超范围题，不是 48 题总体。
 
 ### 实验一：检索架构 A/B（670 条可答题）
 
@@ -155,8 +157,8 @@ py -3.12 -m venv .venv
 
 ### 实验二：长文信息保留率 + OCR 清洗
 
-- 信息保留率（含医药实体的信息句完整保留在单个块内的比例）：朴素截断 512 token **51.5%** → 语义切分+Token回退 **87.9%**（绝对 +36.4pp，信息丢失减少 75%）
-- OCR 噪声文档（模拟扫描件，CER≈3.5%）：医药术语恢复率 **90.2% → 97.6%**（清洗后）
+- 信息保留率（含医药实体的信息句完整保留在单个块内的比例）：朴素截断 512 token **59.5%** → 语义切分+Token回退 **87.8%**（绝对 **+28.4pp**，信息丢失减少 **70.0%**；6622 句，明细 `reports/eval_results.json` → `exp2_retention_ocr`，字段 `improvement_abs=0.2836` / `improvement_relative=0.6997`）
+- OCR 噪声文档（模拟扫描件，CER≈3.5%）：医药术语恢复率 **90.2% → 97.6%**（清洗后，明细 `exp2_retention_ocr.ocr_recovery._avg`）
 
 ### 实验三：端到端 RAGAS 指标（static 一次检索 vs react 动态决策）
 
@@ -166,12 +168,14 @@ py -3.12 -m venv .venv
 | 上下文精确度 context_precision | 94.3% | 94.4% | ≈ |
 | 上下文召回率 context_recall | 97.2% | 97.3% | ≈ |
 | 答案相关度 answer_relevancy | 80.1% | 80.1% | ≈ |
-| **不可回答题拒答正确率** | **0.0%** | **90.0%** | **+90pp** |
-| 可回答题过度拒答率 | 0.0% | 0.0% | 0 |
+| **不可回答题拒答正确率** | **0.0%（0/30）** | **100.0%（30/30）** | **+100pp** |
+| 可回答题过度拒答率 | 0.0%（0/669） | 0.0%（0/669） | 0 |
 | 错误自信回答率（作答但金标准证据不在上下文） | 2.54% | 2.39% | -0.15pp |
 | 平均检索轮次 | 1.00 | 1.10 | +0.10 |
 
-核心结论：**证据不足时的错误自信回答被系统性抑制**——static 基线对全部 30 条超范围问题都强行作答，react Agent 拒答 27 条且零过度拒答（可答题召回不受影响）。
+> 口径：拒答正确率已按 `reports/e2e_rows_static.jsonl` / `e2e_rows_react.jsonl` 逐题重算同步（699 行：669 可答 + 30 不可答）；其余列为展示批次记录值，同批明细见 `reports/eval_report.md`（faithfulness 86.4%→87.8% 等），两批不可互比，对外引用以 `reports/metrics_index.json` 为准。
+
+核心结论：**证据不足时的错误自信回答被系统性抑制**——static 基线对全部 30 条超范围问题都强行作答，react Agent 拒答全部 **30 条（30/30）** 且零过度拒答（669 条可答题召回不受影响）。
 
 ### 实验三·补充：忠实度对比——LLM 无证据自由生成 vs 证据约束生成
 
@@ -228,7 +232,7 @@ py -3.12 -m venv .venv
 |---|---|---|
 | Recall@30 62%→84% | dense R@30 97.9% → full 99.1% | 本语料规模小、条目级 gold 较易命中，绝对值偏高；改进趋势一致 |
 | Top-1 +13% | Top-1 82.5%→97.5%（**+15.0pp**，含 API CrossEncoder 重排） | 同量级偏强 |
-| 长文信息保留率 +20% | 51.5%→87.9%（丢失减少 75%） | 本基线更严格（整篇截断） |
+| 长文信息保留率 +20% | 59.5%→87.8%（丢失减少 70.0%） | 本基线更严格（整篇截断） |
 | Faiss-HNSW P95≈120ms | HNSW P95=0.37ms；全管线 P95=39.4ms | 远低于上限（语料规模 1k 块） |
 | 记忆命中率 +10%、错误率 -13% | 指代轮命中率 +68.8pp、错误率 -48.8pp | 更大幅度的同方向改进 |
 | 忠实度 71%→85%，上下文精确率/召回率 >90% | faithfulness 94%，context precision 94.4%，recall 97.3% | 抽取式回答 + 证据门控，>90% 达成 |

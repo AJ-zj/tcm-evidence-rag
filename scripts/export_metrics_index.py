@@ -100,7 +100,14 @@ add("长文信息保留率", "59.5% → 87.8%",
     [pct(exp2["naive_truncation"]["overall"]), pct(exp2["semantic_chunking"]["overall"])], FULL,
     "exp2_retention_ocr.naive_truncation.overall → semantic_chunking.overall",
     f"sentences={exp2['naive_truncation']['sentences']}", REPRO_FULL,
-    "README 实验二表格写 51.5%→87.9%，属另一批次展示值，仓库无对应明细文件")
+    "README 实验二表格已同步为该明细值：59.5%→87.8%（+28.4pp，信息丢失减少 70.0%）")
+add("长文信息保留率绝对提升", "+28.4pp", pct(exp2["improvement_abs"]), FULL,
+    "exp2_retention_ocr.improvement_abs",
+    f"sentences={exp2['naive_truncation']['sentences']}", REPRO_FULL)
+add("信息丢失减少比例", "70.0%", pct(exp2["improvement_relative"]), FULL,
+    "exp2_retention_ocr.improvement_relative",
+    f"sentences={exp2['naive_truncation']['sentences']}", REPRO_FULL,
+    "相对朴素截断的信息丢失量减少比例，不是保留率的提升幅度")
 ocr = exp2["ocr_recovery"]["_avg"]
 add("OCR 医药术语恢复率", "90.2% → 97.6%",
     [pct(ocr["term_recall_raw"]), pct(ocr["term_recall_cleaned"])], FULL,
@@ -128,7 +135,7 @@ add("端到端拒答提升", "0% → 100%",
      full["exp3_e2e_react"]["refusal_accuracy_on_unanswerable"]], FULL,
     "exp3_e2e_static.refusal_accuracy_on_unanswerable → exp3_e2e_react",
     f"n_items={full['exp3_e2e_react']['n_items']}", REPRO_FULL,
-    "与 e2e_rows_*.jsonl 逐题重算一致；README 实验三表格的 90.0% 与本明细不符，不采用")
+    "与 e2e_rows_*.jsonl 逐题重算一致；README 实验三表格已同步为 0/30 → 30/30 = 100%")
 
 # ---- 独立复核实验（不属于上述两批） ----
 add("生成方式对照忠实度", "56.0% → 88.8%",
@@ -168,7 +175,7 @@ index = {
     "description": "简历与 README 中所有量化指标的明细出处索引。每个条目含值、来源文件、字段路径、样本量与复现命令。",
     "caveats": [
         "本仓库存在两批不同评测运行（670 题 API 重排 / 699 题默认管线），数字不可直接互比。",
-        "README 实验二、三表格中的部分展示值没有对应明细文件；本索引只收录可从 reports/ 与 config/ 追溯的值。",
+        "README 实验二的信息保留率与实验三的拒答正确率已同步为本索引明细值；其余展示批次记录值不纳入索引。",
         "官方 RAGAS 与生成方式对照是两套独立复核实验，不属于上述任一评测批次。",
     ],
     "metrics": metrics,

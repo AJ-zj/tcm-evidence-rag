@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "generated_by": "scripts/export_metrics_index.py",
-  "generated_at": "2026-11-05T10:40:53Z",
+  "generated_at": "2026-11-05T11:02:39Z",
   "description": "简历与 README 中所有量化指标的明细出处索引。每个条目含值、来源文件、字段路径、样本量与复现命令。",
   "caveats": [
     "本仓库存在两批不同评测运行（670 题 API 重排 / 699 题默认管线），数字不可直接互比。",
-    "README 实验二、三表格中的部分展示值没有对应明细文件；本索引只收录可从 reports/ 与 config/ 追溯的值。",
+    "README 实验二的信息保留率与实验三的拒答正确率已同步为本索引明细值；其余展示批次记录值不纳入索引。",
     "官方 RAGAS 与生成方式对照是两套独立复核实验，不属于上述任一评测批次。"
   ],
   "metrics": [
@@ -112,7 +112,26 @@
       "field": "exp2_retention_ocr.naive_truncation.overall → semantic_chunking.overall",
       "sample": "sentences=6622",
       "reproduce": "python scripts/run_eval.py",
-      "note": "README 实验二表格写 51.5%→87.9%，属另一批次展示值，仓库无对应明细文件"
+      "note": "README 实验二表格已同步为该明细值：59.5%→87.8%（+28.4pp，信息丢失减少 70.0%）"
+    },
+    {
+      "name": "长文信息保留率绝对提升",
+      "display": "+28.4pp",
+      "value": 28.36,
+      "source": "reports/eval_results.json",
+      "field": "exp2_retention_ocr.improvement_abs",
+      "sample": "sentences=6622",
+      "reproduce": "python scripts/run_eval.py"
+    },
+    {
+      "name": "信息丢失减少比例",
+      "display": "70.0%",
+      "value": 69.97,
+      "source": "reports/eval_results.json",
+      "field": "exp2_retention_ocr.improvement_relative",
+      "sample": "sentences=6622",
+      "reproduce": "python scripts/run_eval.py",
+      "note": "相对朴素截断的信息丢失量减少比例，不是保留率的提升幅度"
     },
     {
       "name": "OCR 医药术语恢复率",
@@ -175,7 +194,7 @@
       "field": "exp3_e2e_static.refusal_accuracy_on_unanswerable → exp3_e2e_react",
       "sample": "n_items=699",
       "reproduce": "python scripts/run_eval.py",
-      "note": "与 e2e_rows_*.jsonl 逐题重算一致；README 实验三表格的 90.0% 与本明细不符，不采用"
+      "note": "与 e2e_rows_*.jsonl 逐题重算一致；README 实验三表格已同步为 0/30 → 30/30 = 100%"
     },
     {
       "name": "生成方式对照忠实度",
